@@ -130,21 +130,18 @@ void setup()
     stepper->setSpeedInHz(Mspeed); // STEPS PER SECOND
     stepper->setAcceleration(Maccell);
 
-    if (micro != 0)
-    {
-        StepsPerRoation = StepsPerRoation * micro;
-    };
+    if (micro) StepsPerRoation = StepsPerRoation * micro;
 
-    xTaskCreatePinnedToCore(PrintTask, "Print", 2000, NULL, tskIDLE_PRIORITY, &Print, 1);
+    // xTaskCreatePinnedToCore(PrintTask, "Print", 2000, NULL, tskIDLE_PRIORITY, &Print, 1);
     xTaskCreatePinnedToCore(MotorTask, "Motor", 5000, NULL, 5, &Motor, 0);
-    xTaskCreatePinnedToCore(InputTask, "Input", 5000, NULL, 2, &Input, 1);
+    // xTaskCreatePinnedToCore(InputTask, "Input", 5000, NULL, 2, &Input, 1);
 }
 
 void loop()
 {
     server.handleClient();
 
-    vTaskDelete(NULL);
+    // vTaskDelete(NULL);
 }
 
 void connectToWiFi()
@@ -187,7 +184,7 @@ void PrintTask(void *)
     float ActualSpeed;
     float MaxSpeed;
 
-    for (;;)
+    while (true)
     {
         steppes = driver.TSTEP();
         SSpeed = 12000000. / (steppes * 256.);
@@ -255,7 +252,7 @@ void PrintTask(void *)
 
 void InputTask(void *) // CHECK FOR SERIAL COMMANDS
 {
-    for (;;)
+    while (true)
     {
         int dataIn = 0;
 
@@ -281,20 +278,25 @@ void InputTask(void *) // CHECK FOR SERIAL COMMANDS
                 driver.rms_current(AMPS, 0.01);
             };
         };
+
         vTaskDelay(5);
     }
 }
 
 void MotorTask(void *)
 {
-    for (;;)
+    while (true)
     {
+        bool blocking = true;
+
         unsigned long timeIs = millis();
-        stepper->moveTo(moveMM / (MMperRev / StepsPerRoation), true); // TRUE makes this a blocking function. Remove it to use it as non blocking.
+        stepper->moveTo(moveMM / (MMperRev / StepsPerRoation), blocking); // TRUE makes this a blocking function. Remove it to use it as non blocking.
         howLong = millis() - timeIs;
+
         vTaskDelay(2000);
 
-        stepper->moveTo(0, true); //
+        stepper->moveTo(0, blocking); //
+
         vTaskDelay(2000);
     }
 }

@@ -2,11 +2,19 @@ const char WEBPAGE[] PROGMEM = R"=====(
     <html>
 
         <head>
+            <title>Reloader Motor</title>
+
+            <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+            <meta charset='UTF-8' />
+
             <script>
                 var xhr = new XMLHttpRequest();
                 var item;
 
-                xhr.onreadystatechange = () => {
+                xhr.onreadystatechange = function() {
+                    console.log("Response: " + this.responseText);
+                    console.log("readyState: " + this.readyState);
+                    console.log("status: " + this.status);
                     if (this.readyState == 4 && this.status == 200) {
                         let result = JSON.parse(this.responseText);
                         switch (item) {
@@ -26,7 +34,8 @@ const char WEBPAGE[] PROGMEM = R"=====(
         </head>
 
         <body>
-            Hello World!
+            <h1>Reloader Motor</h1>
+
             <p>
                 LED <button id="led" onclick="switchLED()">OFF</button>
             </p>
