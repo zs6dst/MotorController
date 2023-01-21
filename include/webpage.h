@@ -8,36 +8,38 @@ const char WEBPAGE[] PROGMEM = R"=====(
             <meta charset='UTF-8' />
 
             <script>
-                var xhr = new XMLHttpRequest();
-                var item;
+                var socket;
 
-                xhr.onreadystatechange = function() {
-                    console.log("Response: " + this.responseText);
-                    console.log("readyState: " + this.readyState);
-                    console.log("status: " + this.status);
-                    if (this.readyState == 4 && this.status == 200) {
-                        let result = JSON.parse(this.responseText);
-                        switch (item) {
-                            case "led":
-                                document.getElementById(item).innerHTML = result.led ? "ON" : "OFF";
-                                break;
-                        }
+                function messageHandler(event) {
+                    console.log("Received from websocket: " + event.data);
+
+                    let data = JSON.parse(event.data);
+                    if (!data) {
+                        console.log('No data received from websocket');
+                        return;
                     }
-                };
 
-                function switchLED() {
-                    item = "led";
-                    xhr.open("GET", "/led", true);
-                    xhr.send();
+                    if (data.id === 'led') document.getElementById('led').innerHTML = data.value ? "ON" : "OFF";
                 }
+
+                function init() {
+                    let url = 'ws://' + window.location.hostname + ':81/';
+                    socket = new WebSocket(url);
+                    socket.onmessage = (event) => { messageHandler(event); };
+                }
+
+                function toggleLed() { //Toggle LED value; ie. no value specified, only ID
+                    socket.send(JSON.stringify({ id: "led" }));
+                }
+
+                window.onload = (event) => init();
             </script>
         </head>
 
         <body>
-            <h1>Reloader Motor</h1>
-
+            <h1>AutoReloader</h1>
             <p>
-                LED <button id="led" onclick="switchLED()">OFF</button>
+                LED <button id="led" onClick=toggleLed()>?</button>
             </p>
 
         </body>

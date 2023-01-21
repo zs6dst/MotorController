@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WebServer.h>
+#include <WebSocketsServer.h>
 #include <ArduinoJson.h>
 #include "webpage.h"
 
@@ -11,12 +12,20 @@ const char localSSID[] = "zeniton";
 const char password[] = "CT33KATPRbaXN";
 
 WebServer server(80);
+WebSocketsServer websocket = WebSocketsServer(81);
+
+int interval = 1000;              // Virtual delay
+unsigned long previousMillis = 0; // Tracks the time since last event fired
+
 bool led;
 
 void connectToWiFi();
 void sendPage(WiFiClient *);
 void onConnectHandler();
-void onLedHandler();
+void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length);
+void sendData();
+void updateData();
+void toggleLed();
 
 // LIBRARIES THAT YOU NEED
 #include <TMCStepper.h>       // https://www.arduino.cc/reference/en/libraries/tmcstepper/
@@ -58,15 +67,16 @@ void InputTask(void *);
 
 void setup()
 {
+    pinMode(LED, OUTPUT);
+
     Serial.begin(115200);
 
     connectToWiFi();
 
     server.on("/", onConnectHandler);
-    server.on("/led", onLedHandler);
+    websocket.onEvent(onWebSocketEvent);
     server.begin();
-
-    pinMode(LED, OUTPUT);
+    websocket.begin();
 
     // INTITIALIZE SERIAL0 ITERFACE
     Serial.begin(115200);
@@ -140,8 +150,22 @@ void setup()
 void loop()
 {
     server.handleClient();
+    websocket.loop();
 
-    // vTaskDelete(NULL);
+    auto currentMillis = millis();
+    if ((currentMillis - previousMillis) >= interval)
+    {
+        updateData();
+        sendData();
+        previousMillis = currentMillis;
+    }
+}
+
+void updateData()
+{
+    Serial.println(digitalRead(LED));
+    led = digitalRead(LED) == HIGH;
+    Serial.println(led);
 }
 
 void connectToWiFi()
@@ -159,22 +183,47 @@ void connectToWiFi()
 }
 
 void onConnectHandler()
-{
+{   //Send the webpage
     server.send(200, "text/html", String(WEBPAGE));
 }
 
-void onLedHandler()
+void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
 {
-    led = !led;
-    digitalWrite(LED, led ? HIGH : LOW);
+    switch (type)
+    {
+    case WStype_DISCONNECTED:
+        Serial.println(": Client disconnected");
+        break;
 
-    StaticJsonDocument<JSON_OBJECT_SIZE(1)> result;
-    result["led"] = led;
+    case WStype_CONNECTED:
+        Serial.println(": Client connected");
+        sendData();
+        break;
+
+    case WStype_TEXT:
+        Serial.printf("Received request from client: %s\n", payload);
+        StaticJsonDocument<JSON_OBJECT_SIZE(1)> req;
+        deserializeJson(req, payload);
+        auto id = req["id"];
+        if (id == "led") toggleLed();
+        break;
+    }
+}
+
+void toggleLed()
+{
+    digitalWrite(LED, led ? LOW : HIGH);
+}
+
+void sendData()
+{
+    StaticJsonDocument<JSON_OBJECT_SIZE(2)> data;
+    data["id"] = "led";
+    data["value"] = led;
 
     char json[32];
-    serializeJson(result, json);
-
-    server.send(200, "application/json", String(json));
+    serializeJson(data, json);
+    websocket.broadcastTXT(json);
 }
 
 void PrintTask(void *)
