@@ -35,12 +35,12 @@ void setAmps(int);
 #include "FastAccelStepper.h" // https://www.arduino.cc/reference/en/libraries/fastaccelstepper/
 
 // DEFINE YOUR STARTING VALUES!
-int AMPS = 1500;             // SET STARTING CURRENT MAX 2000
-int micro = 0;               // SET MICROSTEPS
-int Maccell = 1000;          // SET STARTING ACCELERATION
-int Mspeed = 1000;           // SET STARTING STEPS/S
-int MMperRev = 2;            // SET MM PER REVOLUTION
-int moveMM = 57;             // SET MOVEMENT IN MM
+int AMPS = 1500;              // SET STARTING CURRENT MAX 2000
+int micro = 0;                // SET MICROSTEPS
+int Maccell = 1000;           // SET STARTING ACCELERATION
+int Mspeed = 1000;            // SET STARTING STEPS/S
+int MMperRev = 2;             // SET MM PER REVOLUTION
+int moveMM = 57;              // SET MOVEMENT IN MM
 float StepsPerRotation = 200; // PHYSICAL STEPS OF MOTOR, NO MICROSTEPS INCLUDED
 
 // SET THESE 3 PER YOUR CONNECTIONS, AND YOU ARE GOOD TO GO!:
@@ -61,10 +61,6 @@ FastAccelStepper *stepper = NULL;
 unsigned long howLong = 0;
 
 TaskHandle_t Motor;
-TaskHandle_t Print;
-TaskHandle_t Input;
-
-void PrintTask(void *);
 void MotorTask(void *);
 
 void setup()
@@ -242,90 +238,39 @@ void setAmps(int value)
     driver.rms_current(value, 0.01);
 }
 
-void sendData()
+void addDataItem(JsonArray *array, const char *id, const char *value)
 {
-    StaticJsonDocument<JSON_OBJECT_SIZE(2)> data;
-    data["id"] = "led";
-    data["value"] = led;
-
-    char json[32];
-    serializeJson(data, json);
-    websocket.broadcastTXT(json);
+    JsonObject item = array->createNestedObject();
+    item["id"] = id;
+    item["value"] = value;
 }
 
-void PrintTask(void *)
+void sendData()
 {
     int SSpeed;
     int steppes;
     float ActualSpeed;
     float MaxSpeed;
 
-    while (true)
-    {
-        steppes = driver.TSTEP();
-        SSpeed = 12000000. / (steppes * 256.);
-        ActualSpeed = (SSpeed / StepsPerRotation) * MMperRev;
+    steppes = driver.TSTEP();
+    SSpeed = 12000000. / (steppes * 256.);
+    ActualSpeed = (SSpeed / StepsPerRotation) * MMperRev;
 
-        if (ActualSpeed > MaxSpeed)
-            MaxSpeed = ActualSpeed;
-        if (ActualSpeed == 0)
-            MaxSpeed = 0;
+    if (ActualSpeed > MaxSpeed)
+        MaxSpeed = ActualSpeed;
+    if (ActualSpeed == 0)
+        MaxSpeed = 0;
 
-        Serial.print("ACTUAL");
-        Serial.print(F(" / "));
-        Serial.print("MAX");
-        Serial.print(F(" / "));
-        Serial.print("AVARAGE");
-        Serial.print(F(" / "));
-        Serial.println("REQUESTED");
-        Serial.print(ActualSpeed, 2);
-        Serial.print(F(" / "));
-        Serial.print(MaxSpeed, 2);
-        Serial.print(F(" / "));
-        Serial.print((moveMM / (howLong / 1000.)), 2);
-        Serial.print(F(" / "));
-        Serial.print((Mspeed / StepsPerRotation) * MMperRev, 2);
-        Serial.println(F(" MM/S"));
-        Serial.print(SSpeed);
-        Serial.print(" / ");
-        Serial.print(MaxSpeed / (MMperRev / StepsPerRotation), 0);
-        Serial.print(" / ");
-        Serial.print((moveMM / (MMperRev / StepsPerRotation)) / (howLong / 1000.), 0);
-        Serial.print(" / ");
-        Serial.print(Mspeed);
-        Serial.println(F(" STEPS/S"));
-        Serial.print(60. * (SSpeed / StepsPerRotation), 0);
-        Serial.print(" / ");
-        Serial.print(60. * ((MaxSpeed / (MMperRev / StepsPerRotation)) / StepsPerRotation), 0);
-        Serial.print(" / ");
-        Serial.print((((moveMM / (MMperRev / StepsPerRotation)) / (howLong / 1000.)) / StepsPerRotation) * 60., 0);
-        Serial.print(" / ");
-        Serial.print(60. * (Mspeed / StepsPerRotation), 0);
-        Serial.println(F(" RPM"));
-        Serial.print(Maccell);
-        Serial.println(F(" ACCELERATION"));
-        Serial.println("----------------------------------");
-        Serial.print(driver.cs2rms(driver.cs_actual()), DEC);
-        Serial.print(" / ");
-        Serial.print(AMPS);
-        Serial.println(" MA MOTOR CURRENT");
-        Serial.print(stepper->getCurrentPosition());
-        Serial.print(" / ");
-        Serial.print(stepper->targetPos());
-        Serial.println(" STEP POSITION");
-        Serial.print(driver.SG_RESULT());
-        Serial.println(" STALLGUARD");
-        Serial.print(steppes);
-        Serial.println(" TSTEP");
-        Serial.print(float(howLong / 1000.), 2);
-        Serial.println("S LAST MOVEMENT DURATION");
-        Serial.print(driver.microsteps());
-        Serial.println(F(" MICROSTEPS"));
+    char buf[32];
+    StaticJsonDocument<1024> data;
+    JsonArray array = data.to<JsonArray>();
+    addDataItem(&array, "led", led ? "ON" : "OFF");
+    addDataItem(&array, "actAmp", itoa(driver.cs2rms(driver.cs_actual()), buf, 10));
+    addDataItem(&array, "maxAmp", itoa(AMPS, buf, 10));
 
-        Serial.println("----------------------------------");
-
-        vTaskDelay(100);
-    }
+    char json[1024];
+    serializeJson(array, json);
+    websocket.broadcastTXT(json);
 }
 
 void MotorTask(void *)
