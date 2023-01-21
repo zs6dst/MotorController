@@ -26,6 +26,9 @@ void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length);
 void sendData();
 void updateData();
 void toggleLed();
+void setSpeed(int);
+void setAcceleration(int);
+void setAmps(int);
 
 // LIBRARIES THAT YOU NEED
 #include <TMCStepper.h>       // https://www.arduino.cc/reference/en/libraries/tmcstepper/
@@ -38,7 +41,7 @@ int Maccell = 1000;          // SET STARTING ACCELERATION
 int Mspeed = 1000;           // SET STARTING STEPS/S
 int MMperRev = 2;            // SET MM PER REVOLUTION
 int moveMM = 57;             // SET MOVEMENT IN MM
-float StepsPerRoation = 200; // PHYSICAL STEPS OF MOTOR, NO MICROSTEPS INCLUDED
+float StepsPerRotation = 200; // PHYSICAL STEPS OF MOTOR, NO MICROSTEPS INCLUDED
 
 // SET THESE 3 PER YOUR CONNECTIONS, AND YOU ARE GOOD TO GO!:
 #define DIR_PIN 4           // Direction
@@ -63,7 +66,6 @@ TaskHandle_t Input;
 
 void PrintTask(void *);
 void MotorTask(void *);
-void InputTask(void *);
 
 void setup()
 {
@@ -79,14 +81,11 @@ void setup()
     websocket.begin();
 
     // INTITIALIZE SERIAL0 ITERFACE
-    Serial.begin(115200);
-    Serial.println(F("---------------------------------------------------"));
     Serial.println(F("UART0 serial output interface intitialized @ 115200"));
 
     // INITIALIZE SERIAL2 UART FOR TMC2209
     SERIAL_PORT.begin(115200); //,SERIAL_8N1, 16, 17
     Serial.println(F("UART2 interface for TMC2209 intitialized   @ 115200"));
-    Serial.println(F("---------------------------------------------------"));
 
     // TMCSTEPPER SETTINGS
     driver.begin();
@@ -140,11 +139,11 @@ void setup()
     stepper->setSpeedInHz(Mspeed); // STEPS PER SECOND
     stepper->setAcceleration(Maccell);
 
-    if (micro) StepsPerRoation = StepsPerRoation * micro;
+    if (micro)
+        StepsPerRotation = StepsPerRotation * micro;
 
     // xTaskCreatePinnedToCore(PrintTask, "Print", 2000, NULL, tskIDLE_PRIORITY, &Print, 1);
     xTaskCreatePinnedToCore(MotorTask, "Motor", 5000, NULL, 5, &Motor, 0);
-    // xTaskCreatePinnedToCore(InputTask, "Input", 5000, NULL, 2, &Input, 1);
 }
 
 void loop()
@@ -163,9 +162,7 @@ void loop()
 
 void updateData()
 {
-    Serial.println(digitalRead(LED));
     led = digitalRead(LED) == HIGH;
-    Serial.println(led);
 }
 
 void connectToWiFi()
@@ -183,7 +180,7 @@ void connectToWiFi()
 }
 
 void onConnectHandler()
-{   //Send the webpage
+{ // Send the webpage
     server.send(200, "text/html", String(WEBPAGE));
 }
 
@@ -201,11 +198,20 @@ void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
         break;
 
     case WStype_TEXT:
-        Serial.printf("Received request from client: %s\n", payload);
-        StaticJsonDocument<JSON_OBJECT_SIZE(1)> req;
+        Serial.printf("Request received: %s\n", payload);
+
+        StaticJsonDocument<JSON_OBJECT_SIZE(2)> req;
         deserializeJson(req, payload);
+
         auto id = req["id"];
-        if (id == "led") toggleLed();
+        if (id == "led")
+            toggleLed();
+        if (id == "speed")
+            setSpeed(atoi(req["value"]));
+        if (id == "accel")
+            setAcceleration(atoi(req["value"]));
+        if (id == "amps")
+            setAmps(atoi(req["value"]));
         break;
     }
 }
@@ -213,6 +219,27 @@ void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
 void toggleLed()
 {
     digitalWrite(LED, led ? LOW : HIGH);
+}
+
+void setSpeed(int value)
+{
+    Serial.printf("setSpeed: %d\n", value);
+    Mspeed = value;
+    stepper->setSpeedInHz(value);
+}
+
+void setAcceleration(int value)
+{
+    Serial.printf("setAcceleration: %d\n", value);
+    Maccell = value;
+    stepper->setAcceleration(value);
+}
+
+void setAmps(int value)
+{
+    Serial.printf("setAmps: %d\n", value);
+    AMPS = value;
+    driver.rms_current(value, 0.01);
 }
 
 void sendData()
@@ -237,10 +264,12 @@ void PrintTask(void *)
     {
         steppes = driver.TSTEP();
         SSpeed = 12000000. / (steppes * 256.);
-        ActualSpeed = (SSpeed / StepsPerRoation) * MMperRev;
+        ActualSpeed = (SSpeed / StepsPerRotation) * MMperRev;
 
-        if (ActualSpeed > MaxSpeed) MaxSpeed = ActualSpeed;
-        if (ActualSpeed == 0) MaxSpeed = 0;
+        if (ActualSpeed > MaxSpeed)
+            MaxSpeed = ActualSpeed;
+        if (ActualSpeed == 0)
+            MaxSpeed = 0;
 
         Serial.print("ACTUAL");
         Serial.print(F(" / "));
@@ -255,23 +284,23 @@ void PrintTask(void *)
         Serial.print(F(" / "));
         Serial.print((moveMM / (howLong / 1000.)), 2);
         Serial.print(F(" / "));
-        Serial.print((Mspeed / StepsPerRoation) * MMperRev, 2);
+        Serial.print((Mspeed / StepsPerRotation) * MMperRev, 2);
         Serial.println(F(" MM/S"));
         Serial.print(SSpeed);
         Serial.print(" / ");
-        Serial.print(MaxSpeed / (MMperRev / StepsPerRoation), 0);
+        Serial.print(MaxSpeed / (MMperRev / StepsPerRotation), 0);
         Serial.print(" / ");
-        Serial.print((moveMM / (MMperRev / StepsPerRoation)) / (howLong / 1000.), 0);
+        Serial.print((moveMM / (MMperRev / StepsPerRotation)) / (howLong / 1000.), 0);
         Serial.print(" / ");
         Serial.print(Mspeed);
         Serial.println(F(" STEPS/S"));
-        Serial.print(60. * (SSpeed / StepsPerRoation), 0);
+        Serial.print(60. * (SSpeed / StepsPerRotation), 0);
         Serial.print(" / ");
-        Serial.print(60. * ((MaxSpeed / (MMperRev / StepsPerRoation)) / StepsPerRoation), 0);
+        Serial.print(60. * ((MaxSpeed / (MMperRev / StepsPerRotation)) / StepsPerRotation), 0);
         Serial.print(" / ");
-        Serial.print((((moveMM / (MMperRev / StepsPerRoation)) / (howLong / 1000.)) / StepsPerRoation) * 60., 0);
+        Serial.print((((moveMM / (MMperRev / StepsPerRotation)) / (howLong / 1000.)) / StepsPerRotation) * 60., 0);
         Serial.print(" / ");
-        Serial.print(60. * (Mspeed / StepsPerRoation), 0);
+        Serial.print(60. * (Mspeed / StepsPerRotation), 0);
         Serial.println(F(" RPM"));
         Serial.print(Maccell);
         Serial.println(F(" ACCELERATION"));
@@ -299,39 +328,6 @@ void PrintTask(void *)
     }
 }
 
-void InputTask(void *) // CHECK FOR SERIAL COMMANDS
-{
-    while (true)
-    {
-        int dataIn = 0;
-
-        if (Serial.available())
-        {
-            dataIn = Serial.parseInt();
-
-            if (dataIn > 0 && dataIn < 10000)
-            {
-                Mspeed = dataIn;
-                stepper->setSpeedInHz(Mspeed);
-            };
-
-            if (dataIn >= 100000 && dataIn < 200000)
-            {
-                Maccell = dataIn - 10000;
-                stepper->setAcceleration(Maccell);
-            };
-
-            if (dataIn >= 200000 && dataIn <= 202001)
-            {
-                AMPS = dataIn - 200000;
-                driver.rms_current(AMPS, 0.01);
-            };
-        };
-
-        vTaskDelay(5);
-    }
-}
-
 void MotorTask(void *)
 {
     while (true)
@@ -339,7 +335,7 @@ void MotorTask(void *)
         bool blocking = true;
 
         unsigned long timeIs = millis();
-        stepper->moveTo(moveMM / (MMperRev / StepsPerRoation), blocking); // TRUE makes this a blocking function. Remove it to use it as non blocking.
+        stepper->moveTo(moveMM / (MMperRev / StepsPerRotation), blocking); // TRUE makes this a blocking function. Remove it to use it as non blocking.
         howLong = millis() - timeIs;
 
         vTaskDelay(2000);
