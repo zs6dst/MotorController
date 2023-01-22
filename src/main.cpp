@@ -17,19 +17,18 @@ TaskHandle_t Motor;
 
 extern WebServer server;
 extern WebSocketsServer websocket;
-extern DRIVER driver;
 
 
 void setup()
 {
     Serial.begin(115200);
 
-    connectToWiFi();
+    setupWiFi();
     setupServers();
     setupLED();
     setupMotor();
 
-    xTaskCreatePinnedToCore(MotorTask, "Motor", 5000, NULL, 5, &Motor, 0);
+    // xTaskCreatePinnedToCore(MotorTask, "Motor", 5000, NULL, 5, &Motor, 0);
 }
 
 void loop()
