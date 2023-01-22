@@ -1,12 +1,9 @@
 #include <Arduino.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
-#include <ArduinoJson.h>
-#include <TMCStepper.h>
-#include <FastAccelStepper.h>
 #include "main.h"
-#include "webservers.h"
 #include "network.h"
+#include "webservers.h"
 #include "led.h"
 #include "motor.h"
 
