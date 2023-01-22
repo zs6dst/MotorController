@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "led.h"
 
+#define LED_PIN 2
+
 bool led;
 
 void setupLED()
