@@ -3,12 +3,11 @@
 #include "network.h"
 
 #define USELOCALWIFI true
+#define AP_IP 10.1.1.1
 
 // Local wifi
 static const char localSSID[] = "zeniton";
 static const char password[] = "CT33KATPRbaXN";
-
-#define AP_IP 10.1.1.1
 
 void connectToWiFi();
 void createAP();

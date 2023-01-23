@@ -1,40 +1,27 @@
-#include <FastAccelStepper.h>
+#include <AccelStepper.h>
 #include "motor.h"
 
-#define DIR_PIN 4  // Direction
-#define STEP_PIN 0 // Step
+#define STEPS_PER_ROTATION 200 // Set for motor in use
+#define STEP_PIN 0             // Step
+#define DIR_PIN 4              // Direction
 
-float StepsPerRotation = 200; // PHYSICAL STEPS OF MOTOR, NO MICROSTEPS INCLUDED
+AccelStepper motor = AccelStepper(1, STEP_PIN, DIR_PIN);
 
-void setupMotor()
+void setupMotor(float speed, float maxSpeed)
 {
-    FastAccelStepperEngine engine = FastAccelStepperEngine();
-    engine.init();
-    auto stepper = engine.stepperConnectToPin(STEP_PIN);
-    stepper->setDirectionPin(DIR_PIN);
-    // stepper->setSpeedInHz(Mspeed);
-    // stepper->setAcceleration(Maccell);
+    motor.setMaxSpeed(maxSpeed);
+    motor.setSpeed(speed);
 }
 
 void setSpeed(int value)
 {
-    Serial.printf("setSpeed: %d\n", value);
 }
 
 void MotorTask(void *)
 {
-    // while (true)
-    // {
-    //     bool blocking = true;
-
-    //     unsigned long timeIs = millis();
-    //     stepper->moveTo(moveMM / (MMperRev / StepsPerRotation), blocking); // TRUE makes this a blocking function. Remove it to use it as non blocking.
-    //     howLong = millis() - timeIs;
-
-    //     vTaskDelay(2000);
-
-    //     stepper->moveTo(0, blocking); //
-
-    //     vTaskDelay(2000);
-    // }
+    while (true)
+    {
+        motor.runSpeed();
+        // vTaskDelay(2000);
+    }
 }

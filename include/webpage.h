@@ -51,16 +51,8 @@ const char WEBPAGE[] PROGMEM = R"=====(
                     socket.send(JSON.stringify(req));
 				}
 				
-				function setSpeed() {
-					sendRequest('speed');
-				}
-
-				function setAcceleration() {
-					sendRequest('accel');
-				}
-				
-				function setAmps() {
-					sendRequest('amps');
+				function setRPM() {
+					sendRequest('rpm');
 				}
 
                 window.onload = (event) => init();
@@ -74,88 +66,10 @@ const char WEBPAGE[] PROGMEM = R"=====(
             </p>
 
             <p>
-                Speed (Hz):
-                <input id="speed"/>
-                <button onClick=setSpeed()>Submit</button>
+                Speed (RPM):
+                <input id="rpm"/>
+                <button onClick=setRPM()>Submit</button>
             </p>
-
-            <p>
-                Acceleration:
-                <input id="accel"/>
-                <button onClick=setAcceleration()>Submit</button>
-            </p>
-
-            <p>
-                Current (Amps):
-                <input id="amps"/>
-                <button onClick=setAmps()>Submit</button>
-            </p>
-			
-			<hr/>
-			<p/>
-			<table border>
-				<tr>
-					<th>Measure</th>
-					<th>Req</th>
-					<th>Act</th>
-					<th>Max</th>
-					<th>Avg</th>
-				</tr>
-				<tr>
-					<td>mm/s</td>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td>steps/s</td>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>				
-				</tr>
-				<tr>
-					<td>RPM</td>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td>Accel</td>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>				
-				</tr>
-			</table>
-			
-			<p/>
-			<strong>Current (mA):</strong>
-			<br/>Act: <input id="actAmp"/>
-			<br/>Max: <input id="maxAmp"/>
-			
-			<p/>
-			<strong>Step position:</strong>
-			<br/>Act: <input id="actStepPos"/>
-			<br/>Max: <input id="maxStepPos"/>
-			
-			<p/>
-			<strong>Stallguard:</strong>
-			<br/><input id="stallguard"/>
-			
-			<p/>
-			<strong>TStep:</strong>
-			<br/><input id="tstep"/>	
-			
-			<p/>
-			<strong>Last movement duration (s):</strong>
-			<br/><input id="lastDuration"/>
-			
-			<p/>
-			<strong>Microsteps:</strong>
-			<br/><input id="microsteps"/>        </body>
-
+        </body>
     </html>
     )=====";

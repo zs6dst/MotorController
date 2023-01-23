@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
+#include <AccelStepper.h>
+
 #include "main.h"
 #include "network.h"
 #include "webservers.h"
@@ -8,13 +10,20 @@
 #include "motor.h"
 
 void updateData();
+float rpm();
 
 Data data;
-TaskHandle_t Motor;
+long t;
+// TaskHandle_t Motor;
 
 extern WebServer server;
 extern WebSocketsServer websocket;
+extern AccelStepper motor;
 
+#define BASESTEPS 200
+#define MICROSTEPS 8
+
+const long STEPS = BASESTEPS * MICROSTEPS;
 
 void setup()
 {
@@ -23,25 +32,19 @@ void setup()
     setupWiFi();
     setupServers();
     setupLED();
-    setupMotor();
 
-    // xTaskCreatePinnedToCore(MotorTask, "Motor", 5000, NULL, 5, &Motor, 0);
+    setupMotor(STEPS, 1000000);
+    Serial.printf("Setup done.Running at %4.1f RPM\n", rpm());
 }
 
 void loop()
 {
-    const int delta = 1000;
-    static unsigned long t = 0;
-    
-    server.handleClient();
-    websocket.loop();
+    motor.runSpeed();
+}
 
-    if ((millis() - t) >= delta)
-    {
-        updateData();
-        sendData(data);
-        t = millis();
-    }
+float rpm()
+{
+    return motor.speed() * 60 / STEPS;
 }
 
 void updateData()
