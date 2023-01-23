@@ -10,6 +10,7 @@
 extern Data data;
 
 void toggleLED();
+void setRPM(float value);
 
 WebServer server(80);
 WebSocketsServer websocket = WebSocketsServer(81);
@@ -39,8 +40,10 @@ void sendData(Data data)
     char buf[32];
     StaticJsonDocument<1024> doc;
     JsonArray array = doc.to<JsonArray>();
-    
+
     addDataItem(&array, "led", data.led ? "ON" : "OFF");
+    sprintf(buf, "%6.1f", data.rpm);
+    addDataItem(&array, "rpm", buf);
 
     char json[1024];
     serializeJson(array, json);
@@ -69,6 +72,11 @@ void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
         auto id = req["id"];
         if (id == "led")
             toggleLED();
+        else if (id == "rpm")
+        {
+            float value = atof(req["value"]);
+            setRPM(value);
+        }
         break;
     }
 }

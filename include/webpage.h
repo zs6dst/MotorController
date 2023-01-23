@@ -1,5 +1,5 @@
 const char WEBPAGE[] PROGMEM = R"=====(
-    <html>
+<html>
 
         <head>
             <title>Reloader Motor</title>

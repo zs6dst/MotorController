@@ -20,11 +20,6 @@ extern WebServer server;
 extern WebSocketsServer websocket;
 extern AccelStepper motor;
 
-#define BASESTEPS 200
-#define MICROSTEPS 8
-
-const long STEPS = BASESTEPS * MICROSTEPS;
-
 void setup()
 {
     Serial.begin(115200);
@@ -40,14 +35,24 @@ void setup()
 void loop()
 {
     motor.runSpeed();
-}
 
-float rpm()
-{
-    return motor.speed() * 60 / STEPS;
+    const int delta = 1000;
+    static unsigned long t = 0;
+
+    server.handleClient();
+    websocket.loop();
+
+    if ((millis() - t) >= delta)
+    {
+        updateData();
+        sendData(data);
+        t = millis();
+    }
 }
 
 void updateData()
 {
     data.led = getLED();
+    data.rpm = rpm();
 }
+
