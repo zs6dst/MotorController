@@ -20,9 +20,8 @@ const char WEBPAGE[] PROGMEM = R"=====(
 
 				function setValue(item) {
 					let element = document.getElementById(item.id);
-					if (element) {
+					if (element)
                         element.innerHTML = item.value;
-					}
 				}
 
                 function messageHandler(event) {
@@ -42,9 +41,13 @@ const char WEBPAGE[] PROGMEM = R"=====(
                     socket = new WebSocket(url);
                     socket.onmessage = (event) => { messageHandler(event); };
                 }
-				
+
 				function sendRequest(id, value) {
                     socket.send(JSON.stringify({ id: id, value: value }));
+				}
+				
+				function restartESP32() {
+					sendRequest('restart', '');
 				}
 
                 function toggleLed() { //Toggle LED value; ie. no value specified, only ID
@@ -62,19 +65,26 @@ const char WEBPAGE[] PROGMEM = R"=====(
         <body>
             <h1>AutoReloader</h1>
             <p>
+                <button style="background-color: red"
+					onClick=restartESP32() >
+					Restart
+				</button>
+            </p>            
+			<hr/>
+			<p>
                 LED <button id="led" onClick=toggleLed()>?</button>
             </p>
+			<hr/>
 
             <p>
-                Speed (RPM):
+                RPM:
                 <input id="rpmIn"/>
-                <button onClick=setRPM()>Submit</button>
-				<hr/>
+                <button onClick=setRPM()>Set</button>
 				<p>
-					RPM: <span id="rpm" class="output">000</span>
+					RPM: <span id="rpm" class="output">---</span>
 				</p>
 				<p>
-					Speed (microsteps/s): <span id="speed" class="output">000</span>
+					Speed (microsteps/sec): <span id="speed" class="output">---</span>
 				</p>
             </p>
         </body>

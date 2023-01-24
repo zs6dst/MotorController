@@ -77,7 +77,9 @@ void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
         deserializeJson(req, payload);
 
         auto id = req["id"];
-        if (id == "led")
+        if (id == "restart")
+            ESP.restart();
+        else if (id == "led")
             toggleLED();
         else if (id == "rpm")
             setRPM(atof(req["value"]));
