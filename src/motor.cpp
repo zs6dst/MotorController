@@ -12,21 +12,16 @@ void setupMotor(float speed, float maxSpeed)
     motor.setSpeed(speed);
 }
 
-void setSpeed(float value)
+float toRPM()
 {
-    motor.setSpeed(value);
-}
-
-float rpm()
-{
-    return motor.speed() * 60 / STEPS;
+    float rpm = motor.speed() * 60 / STEPS;
+    return rpm;
 }
 
 void setRPM(float rpm)
 {
     float speed = rpm * STEPS / 60;
     motor.setSpeed(speed);
-    Serial.printf("RPM: %4.1f\tSpeed: %6.1f\n", rpm, speed);
 }
 
 void MotorTask(void *)

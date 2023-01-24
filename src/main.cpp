@@ -10,11 +10,9 @@
 #include "motor.h"
 
 void updateData();
-float rpm();
 
 Data data;
 long t;
-// TaskHandle_t Motor;
 
 extern WebServer server;
 extern WebSocketsServer websocket;
@@ -29,7 +27,7 @@ void setup()
     setupLED();
 
     setupMotor(STEPS, 1000000);
-    Serial.printf("Setup done.Running at %4.1f RPM\n", rpm());
+    Serial.printf("Setup done.Running at %4.1f RPM\n", toRPM());
 }
 
 void loop()
@@ -53,6 +51,7 @@ void loop()
 void updateData()
 {
     data.led = getLED();
-    data.rpm = rpm();
+    data.rpm = toRPM();
+    data.speed = motor.speed();
 }
 

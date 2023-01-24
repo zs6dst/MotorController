@@ -1,11 +1,19 @@
 const char WEBPAGE[] PROGMEM = R"=====(
-<html>
+        <html>
 
         <head>
             <title>Reloader Motor</title>
 
             <meta name='viewport' content='width=device-width, initial-scale=1.0' />
             <meta charset='UTF-8' />
+			
+			<style>
+				.output {
+					border-width:1px;
+					border-style:solid;
+					border-color:black;
+				}
+			</style>
 
             <script>
                 var socket;
@@ -13,11 +21,7 @@ const char WEBPAGE[] PROGMEM = R"=====(
 				function setValue(item) {
 					let element = document.getElementById(item.id);
 					if (element) {
-                        if (item.id == 'led') {
-                            element.innerHTML = item.value;
-                        } else {
-						    element.value = item.value;
-                        }
+                        element.innerHTML = item.value;
 					}
 				}
 
@@ -38,21 +42,17 @@ const char WEBPAGE[] PROGMEM = R"=====(
                     socket = new WebSocket(url);
                     socket.onmessage = (event) => { messageHandler(event); };
                 }
+				
+				function sendRequest(id, value) {
+                    socket.send(JSON.stringify({ id: id, value: value }));
+				}
 
                 function toggleLed() { //Toggle LED value; ie. no value specified, only ID
-                    socket.send(JSON.stringify({ id: "led" }));
+					sendRequest('led', '');
                 }
 				
-				function sendRequest(id) {
-					let req = { 
-						id: id, 
-						value: document.getElementById(id).value 
-					};
-                    socket.send(JSON.stringify(req));
-				}
-				
 				function setRPM() {
-					sendRequest('rpm');
+					sendRequest('rpm', document.getElementById('rpmIn').value);
 				}
 
                 window.onload = (event) => init();
@@ -67,8 +67,15 @@ const char WEBPAGE[] PROGMEM = R"=====(
 
             <p>
                 Speed (RPM):
-                <input id="rpm"/>
+                <input id="rpmIn"/>
                 <button onClick=setRPM()>Submit</button>
+				<hr/>
+				<p>
+					RPM: <span id="rpm" class="output">000</span>
+				</p>
+				<p>
+					Speed (microsteps/s): <span id="speed" class="output">000</span>
+				</p>
             </p>
         </body>
     </html>

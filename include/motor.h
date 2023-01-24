@@ -8,7 +8,7 @@ const long STEPS = BASESTEPS * MICROSTEPS;
 
 void setupMotor(float speed, float maxSpeed);
 void setRPM(float value);
-float rpm();
+float toRPM();
 void MotorTask(void *);
 
 #endif

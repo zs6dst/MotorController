@@ -37,13 +37,20 @@ void addDataItem(JsonArray *array, const char *id, const char *value)
 
 void sendData(Data data)
 {
-    char buf[32];
     StaticJsonDocument<1024> doc;
     JsonArray array = doc.to<JsonArray>();
 
-    addDataItem(&array, "led", data.led ? "ON" : "OFF");
-    sprintf(buf, "%6.1f", data.rpm);
-    addDataItem(&array, "rpm", buf);
+    char led[8];
+    sprintf(led, "%s", data.led ? "ON" : "OFF");
+    addDataItem(&array, "led", led);
+
+    char rpm[16];
+    sprintf(rpm, "%.1f", data.rpm);
+    addDataItem(&array, "rpm", rpm);
+    
+    char speed[16];
+    sprintf(speed, "%.1f", data.speed);
+    addDataItem(&array, "speed", speed);
 
     char json[1024];
     serializeJson(array, json);
@@ -73,10 +80,7 @@ void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
         if (id == "led")
             toggleLED();
         else if (id == "rpm")
-        {
-            float value = atof(req["value"]);
-            setRPM(value);
-        }
+            setRPM(atof(req["value"]));
         break;
     }
 }
