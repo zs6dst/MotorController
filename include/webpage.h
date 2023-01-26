@@ -13,6 +13,10 @@ const char WEBPAGE[] PROGMEM = R"=====(
 					border-style:solid;
 					border-color:black;
 				}
+                .reset {
+                    color: white;
+                    background-color: red;
+                }
 			</style>
 
             <script>
@@ -57,6 +61,10 @@ const char WEBPAGE[] PROGMEM = R"=====(
 				function setRPM() {
 					sendRequest('rpm', document.getElementById('rpmIn').value);
 				}
+				
+				function setAccel() {
+					sendRequest('accel', document.getElementById('accelIn').value);
+				}
 
                 window.onload = (event) => init();
             </script>
@@ -65,8 +73,7 @@ const char WEBPAGE[] PROGMEM = R"=====(
         <body>
             <h1>AutoReloader</h1>
             <p>
-                <button style="background-color: red"
-					onClick=restartESP32() >
+                <button class="reset" onClick=restartESP32() >
 					Restart
 				</button>
             </p>            
@@ -80,12 +87,20 @@ const char WEBPAGE[] PROGMEM = R"=====(
                 RPM:
                 <input id="rpmIn"/>
                 <button onClick=setRPM()>Set</button>
-				<p>
-					RPM: <span id="rpm" class="output">---</span>
-				</p>
-				<p>
-					Speed (microsteps/sec): <span id="speed" class="output">---</span>
-				</p>
+            </p>
+            <p>
+                Acceleration (Hz/s):
+                <input id="accelIn"/>
+                <button onClick=setAccel()>Set</button>
+            </p>
+            <p>
+                RPM: <span id="rpm" class="output">---</span>
+            </p>
+            <p>
+                Speed (microsteps/sec): <span id="speed" class="output">---</span>
+            </p>
+            <p>
+                Acceleration (Hz/sec): <span id="accel" class="output">---</span>
             </p>
         </body>
     </html>

@@ -11,6 +11,7 @@ extern Data data;
 
 void toggleLED();
 void setRPM(float value);
+void setAcceleration(int32_t value);
 
 WebServer server(80);
 WebSocketsServer websocket = WebSocketsServer(81);
@@ -51,6 +52,10 @@ void sendData(Data data)
     char speed[16];
     sprintf(speed, "%.1f", data.speed);
     addDataItem(&array, "speed", speed);
+    
+    char accel[16];
+    sprintf(accel, "%d", data.acceleration);
+    addDataItem(&array, "accel", accel);
 
     char json[1024];
     serializeJson(array, json);
@@ -83,6 +88,8 @@ void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
             toggleLED();
         else if (id == "rpm")
             setRPM(atof(req["value"]));
+        else if (id == "accel")
+            setAcceleration(atoi(req["value"]));
         break;
     }
 }

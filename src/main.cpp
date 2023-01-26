@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
-#include <AccelStepper.h>
+#include <FastAccelStepper.h>
 
 #include "main.h"
 #include "network.h"
@@ -16,7 +16,7 @@ long t;
 
 extern WebServer server;
 extern WebSocketsServer websocket;
-extern AccelStepper motor;
+extern FastAccelStepper *stepper;
 
 void setup()
 {
@@ -25,15 +25,14 @@ void setup()
     setupWiFi();
     setupServers();
     setupLED();
+    setupMotor(5000, 5000);
 
-    setupMotor(STEPS, 1000000);
-    Serial.printf("Setup done.Running at %4.1f RPM\n", toRPM());
+    stepper->move(1);
+    stepper->keepRunning();
 }
 
 void loop()
 {
-    motor.runSpeed();
-
     const int delta = 1000;
     static unsigned long t = 0;
 
@@ -52,6 +51,6 @@ void updateData()
 {
     data.led = getLED();
     data.rpm = toRPM();
-    data.speed = motor.speed();
+    data.speed = stepper->getCurrentSpeedInMilliHz() / 1000;
+    data.acceleration = stepper->getAcceleration();
 }
-
