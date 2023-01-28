@@ -6,10 +6,12 @@
 
 const long STEPS = BASESTEPS * MICROSTEPS;
 
-void setupMotor(uint32_t speed, uint32_t acceleration);
+void setupMotor(int speed, int acceleration);
 void setRPM(float value);
-void setAcceleration(int32_t value);
-float toRPM();
-void MotorTask(void *);
+float getRPM();
+void setAcceleration(int value);
+int getAcceleration();
+void setSpeed(int value);
+int getSpeed();
 
 #endif
