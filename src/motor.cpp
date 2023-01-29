@@ -1,44 +1,56 @@
 #include <TMC2209.h>
 #include "motor.h"
 
-#define STEP_PIN 0 // Step
-#define DIR_PIN 4  // Direction
-
-TMC2209 driver;
-HardwareSerial &uart = Serial2;
-
-void setupMotor(int speed, int acceleration)
+Motor::Motor()
 {
-    driver.setup(uart);
-
-    // stepper->setSpeedInHz(speed);
-    // stepper->setAcceleration(acceleration);
+    driver.setup(Serial2);
+    baseSteps = 200;
+    microSteps = 8;
 }
 
-void setRPM(float rpm)
+uint Motor::getSteps()
 {
+    return baseSteps * microSteps;
 }
 
-float getRPM()
+uint Motor::getMicroSteps()
 {
-    // float rpm = stepper->getCurrentSpeedInMilliHz() / 1000 * 60 / STEPS;
-    return 0;
+    return microSteps;
 }
 
-void setAcceleration(int value)
+void Motor::setMicroSteps(MICROSTEPS value)
 {
+    microSteps = value;
+    driver.setMicrostepsPerStep(value);
 }
 
-int getAcceleration()
+uint Motor::getSpeed()
 {
-    return 0;
+    return speed;
 }
 
-void setSpeed(int value)
+void Motor::setSpeed(uint value)
 {
+    speed = value;
+    driver.moveAtVelocity(value);
 }
 
-int getSpeed()
+void Motor::setRPM(float rpm)
 {
-    return 0;
+    uint speed = rpm * baseSteps * microSteps / 60;
 }
+
+float Motor::getRPM()
+{
+    return speed * 60.0 / baseSteps / microSteps;
+}
+
+// void Motor::setAcceleration(uint value)
+// {
+//     acceleration = value;
+// }
+
+// uint Motor::getAcceleration()
+// {
+//     return acceleration;
+// }

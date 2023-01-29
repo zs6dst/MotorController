@@ -6,12 +6,13 @@
 #include "main.h"
 #include "webservers.h"
 #include "webpage.h"
+#include "motor.h"
 
 extern Data data;
 
 void toggleLED();
-void setRPM(float value);
-void setAcceleration(int32_t value);
+
+extern Motor motor;
 
 WebServer server(80);
 WebSocketsServer websocket = WebSocketsServer(81);
@@ -87,9 +88,9 @@ void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
         else if (id == "led")
             toggleLED();
         else if (id == "rpm")
-            setRPM(atof(req["value"]));
-        else if (id == "accel")
-            setAcceleration(atoi(req["value"]));
+            motor.setRPM(atof(req["value"]));
+        // else if (id == "accel")
+        //     motor.setAcceleration(atoi(req["value"]));
         break;
     }
 }

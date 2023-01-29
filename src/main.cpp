@@ -9,6 +9,8 @@
 #include "led.h"
 #include "motor.h"
 
+#define now millis() 
+
 void updateData();
 
 Data data;
@@ -17,6 +19,8 @@ long t;
 extern WebServer server;
 extern WebSocketsServer websocket;
 
+Motor motor;
+
 void setup()
 {
     Serial.begin(115200);
@@ -24,32 +28,28 @@ void setup()
     setupWiFi();
     setupServers();
     setupLED();
-    setupMotor(5000, 5000);
-
-    // stepper->move(1);
-    // stepper->keepRunning();
 }
 
 void loop()
 {
-    const int delta = 1000;
-    static unsigned long t = 0;
+    const int moment = 1000; //ms
+    static unsigned long earlier = 0;
 
     server.handleClient();
     websocket.loop();
 
-    if ((millis() - t) >= delta)
+    if (now > earlier + moment)
     {
         updateData();
         sendData(data);
-        t = millis();
+        earlier = now;
     }
 }
 
 void updateData()
 {
     data.led = getLED();
-    data.rpm = getRPM();
-    data.speed = getSpeed();
-    data.acceleration = getAcceleration();
+    data.rpm = motor.getRPM();
+    data.speed = motor.getSpeed();
+    // data.acceleration = motor.getAcceleration();
 }

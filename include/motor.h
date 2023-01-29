@@ -1,17 +1,43 @@
 #ifndef __MOTOR__
 #define __MOTOR__
 
-#define BASESTEPS 200
-#define MICROSTEPS 8
+#include <TMC2209.h>
 
-const long STEPS = BASESTEPS * MICROSTEPS;
+typedef unsigned int uint;
 
-void setupMotor(int speed, int acceleration);
-void setRPM(float value);
-float getRPM();
-void setAcceleration(int value);
-int getAcceleration();
-void setSpeed(int value);
-int getSpeed();
+enum MICROSTEPS
+{
+    _1 = 1,
+    _2 = 2,
+    _4 = 4, 
+    _8 = 8, 
+    _16 = 16,
+    _32 = 32, 
+    _64 = 64, 
+    _128 = 128, 
+    _256 = 256
+};
+
+class Motor
+{
+public:
+    Motor();
+    uint getSteps();
+    uint getMicroSteps();
+    void setMicroSteps(MICROSTEPS value);
+    float getRPM();
+    void setRPM(float value);
+    // uint getAcceleration();
+    // void setAcceleration(uint value);
+    uint getSpeed();
+    void setSpeed(uint value);
+
+private:
+    TMC2209 driver;
+    uint baseSteps;
+    uint microSteps;
+    uint speed;
+    uint acceleration;
+};
 
 #endif
