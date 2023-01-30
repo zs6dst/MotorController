@@ -2,12 +2,16 @@
 #include <WiFi.h>
 #include "network.h"
 
-#define USELOCALWIFI true
+#define USELOCALWIFI false
 #define AP_IP 10.1.1.1
 
 // Local wifi
 static const char localSSID[] = "zeniton";
 static const char password[] = "CT33KATPRbaXN";
+
+//AP
+static const char SSID[] = "AutoReloader";
+static const IPAddress IP = IPAddress(10, 1, 1, 1);
 
 void connectToWiFi();
 void createAP();
@@ -34,6 +38,10 @@ void connectToWiFi()
 void createAP()
 {
     Serial.println("Creating soft AP...");
-    //TODO
-    Serial.printf("Soft AP created. IP: %s\n", "<put IP here>");
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(SSID);
+    WiFi.softAPConfig(IP, IP, IPAddress(255, 255, 255, 0));
+    Serial.print("Soft AP created at ");
+    Serial.println(IP);
 }
+ 
