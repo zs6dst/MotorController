@@ -32,7 +32,7 @@ void setup()
 
 void loop()
 {
-    const int moment = 1000; // ms
+    const int moment = 500; // ms
     static unsigned long earlier = 0;
 
     server.handleClient();
@@ -56,6 +56,11 @@ void setMotoruSteps(uint value)
     motor.setMicroSteps((MICROSTEPS)value);
 }
 
+void setMotorAcceleration(uint value)
+{
+    motor.setAcceleration(value);
+}
+
 void sendData()
 {
     broadcastData(&data);
@@ -67,5 +72,5 @@ void updateData()
     data.microSteps = motor.getMicroSteps();
     data.rpm = motor.getRPM();
     data.speed = motor.getSpeed();
-    // data.acceleration = motor.getAcceleration();
+    data.acceleration = motor.getAcceleration();
 }

@@ -54,9 +54,9 @@ void broadcastData(const Data *data)
     sprintf(speed, "%d", data->speed);
     addDataItem(&array, "speed", speed);
     
-    // char accel[16];
-    // sprintf(accel, "%d", data.acceleration);
-    // addDataItem(&array, "accel", accel);
+    char accel[16];
+    sprintf(accel, "%d", data->acceleration);
+    addDataItem(&array, "accel", accel);
 
     char json[1024];
     serializeJson(array, json);
@@ -91,8 +91,8 @@ void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
             setMotorRPM(atof(req["value"]));
         else if (id == "usteps")
             setMotoruSteps(atof(req["value"]));
-        // else if (id == "accel")
-        //     motor.setAcceleration(atoi(req["value"]));
+        else if (id == "accel")
+            setMotorAcceleration(atoi(req["value"]));
         break;
     }
 }

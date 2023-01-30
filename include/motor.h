@@ -28,8 +28,8 @@ public:
     void setMicroSteps(MICROSTEPS value);
     float getRPM();
     void setRPM(float value);
-    // uint getAcceleration();
-    // void setAcceleration(uint value);
+    uint getAcceleration();
+    void setAcceleration(uint value);
     uint getSpeed();
     void setSpeed(uint value);
 

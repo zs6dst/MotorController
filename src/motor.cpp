@@ -5,6 +5,7 @@ Motor::Motor()
 {
     baseSteps = 200;
     microSteps = 8;
+    acceleration = 1000000;
 
     driver.setup(Serial2);
     driver.setMicrostepsPerStep(microSteps);
@@ -56,13 +57,12 @@ void Motor::setRPM(float rpm)
     driver.moveAtVelocity(this->speed);
 }
 
+void Motor::setAcceleration(uint value)
+{
+    acceleration = value;
+}
 
-// void Motor::setAcceleration(uint value)
-// {
-//     acceleration = value;
-// }
-
-// uint Motor::getAcceleration()
-// {
-//     return acceleration;
-// }
+uint Motor::getAcceleration()
+{
+    return acceleration;
+}
