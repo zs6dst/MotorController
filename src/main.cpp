@@ -27,7 +27,7 @@ void setup()
     setupLED();
 
     motor.diagnose();
-    motor.setSpeed(100);
+    motor.setRPM(60);
 }
 
 void loop()
@@ -51,6 +51,11 @@ void setMotorRPM(float value)
     motor.setRPM(value);
 }
 
+void setMotoruSteps(uint value)
+{
+    motor.setMicroSteps((MICROSTEPS)value);
+}
+
 void sendData()
 {
     broadcastData(&data);
@@ -59,6 +64,7 @@ void sendData()
 void updateData()
 {
     data.led = getLED();
+    data.microSteps = motor.getMicroSteps();
     data.rpm = motor.getRPM();
     data.speed = motor.getSpeed();
     // data.acceleration = motor.getAcceleration();

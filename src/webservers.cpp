@@ -42,6 +42,10 @@ void broadcastData(const Data *data)
     sprintf(led, "%s", data->led ? "ON" : "OFF");
     addDataItem(&array, "led", led);
 
+    char usteps[16];
+    sprintf(usteps, "%d", data->microSteps);
+    addDataItem(&array, "uSteps", usteps);
+    
     char rpm[16];
     sprintf(rpm, "%.1f", data->rpm);
     addDataItem(&array, "rpm", rpm);
@@ -85,6 +89,8 @@ void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
             toggleLED();
         else if (id == "rpm")
             setMotorRPM(atof(req["value"]));
+        else if (id == "usteps")
+            setMotoruSteps(atof(req["value"]));
         // else if (id == "accel")
         //     motor.setAcceleration(atoi(req["value"]));
         break;

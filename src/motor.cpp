@@ -52,12 +52,10 @@ float Motor::getRPM()
 
 void Motor::setRPM(float rpm)
 {
-    Serial.print("setRPM");
-    Serial.println(rpm);
     this->speed = (uint)(rpm * baseSteps * microSteps / 60);
     driver.moveAtVelocity(this->speed);
-    Serial.println(this->speed);
 }
+
 
 // void Motor::setAcceleration(uint value)
 // {

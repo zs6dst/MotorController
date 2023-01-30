@@ -62,6 +62,10 @@ const char WEBPAGE[] PROGMEM = R"=====(
 					sendRequest('rpm', document.getElementById('rpmIn').value);
 				}
 				
+				function setuSteps() {
+					sendRequest('usteps', document.getElementById('uStepsIn').value);
+				}
+				
 				function setAccel() {
 					sendRequest('accel', document.getElementById('accelIn').value);
 				}
@@ -84,6 +88,11 @@ const char WEBPAGE[] PROGMEM = R"=====(
 			<hr/>
 
             <p>
+                Microsteps:
+                <input id="uStepsIn"/>
+                <button onClick=setuSteps()>Set</button>
+            </p>
+            <p>
                 RPM:
                 <input id="rpmIn"/>
                 <button onClick=setRPM()>Set</button>
@@ -93,8 +102,12 @@ const char WEBPAGE[] PROGMEM = R"=====(
                 <input id="accelIn"/>
                 <button onClick=setAccel()>Set</button>
             </p>
+
             <p>
                 RPM: <span id="rpm" class="output">---</span>
+            </p>
+            <p>
+                Microsteps: <span id="uSteps" class="output">---</span>
             </p>
             <p>
                 Speed (microsteps/sec): <span id="speed" class="output">---</span>
