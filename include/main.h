@@ -5,8 +5,10 @@ typedef struct
 {
     bool led;
     float rpm;
-    float speed;
-    uint32_t acceleration;
+    uint speed;
 } Data;
+
+void setMotorRPM(float value);
+void sendData();
 
 #endif

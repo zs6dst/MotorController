@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
-#include <TMC2209.h>
 
 #include "main.h"
 #include "network.h"
@@ -9,17 +8,15 @@
 #include "led.h"
 #include "motor.h"
 
-#define now millis() 
+#define now millis()
 
-void updateData();
-
-Data data;
-long t;
+static Motor motor;
+static Data data;
 
 extern WebServer server;
 extern WebSocketsServer websocket;
 
-Motor motor;
+void updateData();
 
 void setup()
 {
@@ -28,11 +25,14 @@ void setup()
     setupWiFi();
     setupServers();
     setupLED();
+
+    motor.diagnose();
+    motor.setSpeed(100);
 }
 
 void loop()
 {
-    const int moment = 1000; //ms
+    const int moment = 1000; // ms
     static unsigned long earlier = 0;
 
     server.handleClient();
@@ -41,9 +41,19 @@ void loop()
     if (now > earlier + moment)
     {
         updateData();
-        sendData(data);
+        broadcastData(&data);
         earlier = now;
     }
+}
+
+void setMotorRPM(float value)
+{
+    motor.setRPM(value);
+}
+
+void sendData()
+{
+    broadcastData(&data);
 }
 
 void updateData()

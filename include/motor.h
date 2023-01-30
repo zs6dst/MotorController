@@ -22,6 +22,7 @@ class Motor
 {
 public:
     Motor();
+    void diagnose();
     uint getSteps();
     uint getMicroSteps();
     void setMicroSteps(MICROSTEPS value);

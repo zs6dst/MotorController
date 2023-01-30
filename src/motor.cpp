@@ -3,9 +3,19 @@
 
 Motor::Motor()
 {
-    driver.setup(Serial2);
     baseSteps = 200;
     microSteps = 8;
+
+    driver.setup(Serial2);
+    driver.setMicrostepsPerStep(microSteps);
+    driver.setRunCurrent(100);
+    driver.enable();
+}
+
+void Motor::diagnose()
+{
+    bool result = driver.isSetupAndCommunicating();
+    Serial.printf("Stepper driver %ssetup and communicating!\n", result ? "" : "not");
 }
 
 uint Motor::getSteps()
@@ -32,17 +42,21 @@ uint Motor::getSpeed()
 void Motor::setSpeed(uint value)
 {
     speed = value;
-    driver.moveAtVelocity(value);
-}
-
-void Motor::setRPM(float rpm)
-{
-    uint speed = rpm * baseSteps * microSteps / 60;
+    driver.moveAtVelocity(speed);
 }
 
 float Motor::getRPM()
 {
-    return speed * 60.0 / baseSteps / microSteps;
+    return (float)(this->speed * 60.0 / baseSteps / microSteps);
+}
+
+void Motor::setRPM(float rpm)
+{
+    Serial.print("setRPM");
+    Serial.println(rpm);
+    this->speed = (uint)(rpm * baseSteps * microSteps / 60);
+    driver.moveAtVelocity(this->speed);
+    Serial.println(this->speed);
 }
 
 // void Motor::setAcceleration(uint value)

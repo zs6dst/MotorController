@@ -8,11 +8,7 @@
 #include "webpage.h"
 #include "motor.h"
 
-extern Data data;
-
 void toggleLED();
-
-extern Motor motor;
 
 WebServer server(80);
 WebSocketsServer websocket = WebSocketsServer(81);
@@ -37,26 +33,26 @@ void addDataItem(JsonArray *array, const char *id, const char *value)
     item["value"] = value;
 }
 
-void sendData(Data data)
+void broadcastData(const Data *data)
 {
     StaticJsonDocument<1024> doc;
     JsonArray array = doc.to<JsonArray>();
 
     char led[8];
-    sprintf(led, "%s", data.led ? "ON" : "OFF");
+    sprintf(led, "%s", data->led ? "ON" : "OFF");
     addDataItem(&array, "led", led);
 
     char rpm[16];
-    sprintf(rpm, "%.1f", data.rpm);
+    sprintf(rpm, "%.1f", data->rpm);
     addDataItem(&array, "rpm", rpm);
     
     char speed[16];
-    sprintf(speed, "%.1f", data.speed);
+    sprintf(speed, "%d", data->speed);
     addDataItem(&array, "speed", speed);
     
-    char accel[16];
-    sprintf(accel, "%d", data.acceleration);
-    addDataItem(&array, "accel", accel);
+    // char accel[16];
+    // sprintf(accel, "%d", data.acceleration);
+    // addDataItem(&array, "accel", accel);
 
     char json[1024];
     serializeJson(array, json);
@@ -73,7 +69,7 @@ void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
 
     case WStype_CONNECTED:
         Serial.println(": Client connected");
-        sendData(data);
+        sendData();
         break;
 
     case WStype_TEXT:
@@ -88,7 +84,7 @@ void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
         else if (id == "led")
             toggleLED();
         else if (id == "rpm")
-            motor.setRPM(atof(req["value"]));
+            setMotorRPM(atof(req["value"]));
         // else if (id == "accel")
         //     motor.setAcceleration(atoi(req["value"]));
         break;
