@@ -2,8 +2,7 @@
 #define __MOTOR__
 
 #include <TMC2209.h>
-
-typedef unsigned int uint;
+#include "main.h"
 
 enum MICROSTEPS
 {
