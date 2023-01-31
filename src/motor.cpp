@@ -10,6 +10,8 @@ Motor::Motor()
     driver.setup(Serial2);
     driver.setMicrostepsPerStep(microSteps);
     driver.setRunCurrent(100);
+    driver.disableStealthChop();
+    driver.enableCoolStep();
     driver.enable();
 }
 
@@ -53,8 +55,9 @@ float Motor::getRPM()
 
 void Motor::setRPM(float rpm)
 {
-    this->speed = (uint)(rpm * baseSteps * microSteps / 60);
-    driver.moveAtVelocity(this->speed);
+    // this->speed = (uint)(rpm * baseSteps * microSteps / 60);
+    this->speed = (uint)rpm;
+    driver.moveAtVelocity(speed);
 }
 
 void Motor::setAcceleration(uint value)
