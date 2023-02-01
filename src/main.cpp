@@ -27,11 +27,13 @@ void setup()
     setupLED();
 
     motor.diagnose();
-    motor.setRPM(60);
+    motor.setSpeed(100);
 }
 
 void loop()
 {
+    motor.setStealthChop();
+
     const int moment = 500; // ms
     static unsigned long earlier = 0;
 
@@ -69,6 +71,7 @@ void sendData()
 void updateData()
 {
     data.led = getLED();
+    data.stealthChop = motor.getStealthChop();
     data.microSteps = motor.getMicroSteps();
     data.rpm = motor.getRPM();
     data.speed = motor.getSpeed();

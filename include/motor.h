@@ -31,6 +31,9 @@ public:
     void setAcceleration(uint value);
     uint getSpeed();
     void setSpeed(uint value);
+    bool getStealthChop();
+    uint getTSTEP();
+    void setStealthChop();
 
 private:
     TMC2209 driver;

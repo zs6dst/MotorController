@@ -104,6 +104,9 @@ const char WEBPAGE[] PROGMEM = R"=====(
             </p>
 
             <p>
+                StealthChop: <span id="schop" class="output">---</span>
+            </p>
+            <p>
                 RPM: <span id="rpm" class="output">---</span>
             </p>
             <p>

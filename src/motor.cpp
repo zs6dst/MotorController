@@ -1,17 +1,19 @@
 #include <TMC2209.h>
 #include "motor.h"
 
+#define STEALTHCHOP_THRS 650
+
 Motor::Motor()
 {
     baseSteps = 200;
-    microSteps = 8;
+    microSteps = 2;
     acceleration = 1000000;
 
     driver.setup(Serial2);
     driver.setMicrostepsPerStep(microSteps);
     driver.setRunCurrent(100);
-    driver.disableStealthChop();
     driver.enableCoolStep();
+    driver.setStealthChopDurationThreshold(STEALTHCHOP_THRS);
     driver.enable();
 }
 
@@ -46,6 +48,7 @@ void Motor::setSpeed(uint value)
 {
     speed = value;
     driver.moveAtVelocity(speed);
+
 }
 
 float Motor::getRPM()
@@ -55,9 +58,7 @@ float Motor::getRPM()
 
 void Motor::setRPM(float rpm)
 {
-    // this->speed = (uint)(rpm * baseSteps * microSteps / 60);
-    this->speed = (uint)rpm;
-    driver.moveAtVelocity(speed);
+    setSpeed((uint)(rpm * baseSteps * microSteps / 60));
 }
 
 void Motor::setAcceleration(uint value)
@@ -68,4 +69,20 @@ void Motor::setAcceleration(uint value)
 uint Motor::getAcceleration()
 {
     return acceleration;
+}
+
+bool Motor::getStealthChop()
+{
+    TMC2209::Settings settings = driver.getSettings();
+    return settings.stealth_chop_enabled;
+}
+
+uint Motor::getTSTEP()
+{
+    return driver.getInterstepDuration();
+}
+
+void Motor::setStealthChop()
+{
+    (getTSTEP() < STEALTHCHOP_THRS) ? driver.disableStealthChop() : driver.enableStealthChop();
 }

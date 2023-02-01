@@ -42,6 +42,10 @@ void broadcastData(const Data *data)
     sprintf(led, "%s", data->led ? "ON" : "OFF");
     addDataItem(&array, "led", led);
 
+    char schop[8];
+    sprintf(schop, "%s", data->stealthChop ? "ON" : "OFF");
+    addDataItem(&array, "schop", schop);
+
     char usteps[16];
     sprintf(usteps, "%d", data->microSteps);
     addDataItem(&array, "uSteps", usteps);
