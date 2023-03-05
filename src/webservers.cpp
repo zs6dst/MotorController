@@ -54,10 +54,6 @@ void sendData(WebSocketsServer &websocket, const Data *data)
     sprintf(speed, "%d", data->speed);
     addDataItem(&array, "speed", speed);
 
-    char accel[16];
-    sprintf(accel, "%d", data->acceleration);
-    addDataItem(&array, "accel", accel);
-
     char json[1024];
     serializeJson(array, json);
     websocket.broadcastTXT(json);

@@ -65,10 +65,6 @@ const char WEBPAGE[] PROGMEM = R"=====(
 				function setuSteps() {
 					sendRequest('usteps', document.getElementById('uStepsIn').value);
 				}
-				
-				function setAccel() {
-					sendRequest('accel', document.getElementById('accelIn').value);
-				}
 
                 window.onload = (event) => init();
             </script>
@@ -97,11 +93,6 @@ const char WEBPAGE[] PROGMEM = R"=====(
                 <input id="rpmIn"/>
                 <button onClick=setRPM()>Set</button>
             </p>
-            <p>
-                Acceleration (Hz/s):
-                <input id="accelIn"/>
-                <button onClick=setAccel()>Set</button>
-            </p>
 
             <p>
                 StealthChop: <span id="schop" class="output">---</span>
@@ -114,9 +105,6 @@ const char WEBPAGE[] PROGMEM = R"=====(
             </p>
             <p>
                 Speed (microsteps/sec): <span id="speed" class="output">---</span>
-            </p>
-            <p>
-                Acceleration (Hz/sec): <span id="accel" class="output">---</span>
             </p>
         </body>
     </html>

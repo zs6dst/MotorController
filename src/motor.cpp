@@ -2,7 +2,7 @@
 #include "motor.h"
 
 #define UART Serial2
-#define STEALTHCHOP_THRS 650
+#define STEALTHCHOP_THRS 115 //170rpm @ 256uSteps
 
 Motor::Motor()
 {
@@ -72,16 +72,6 @@ void Motor::setRPM(float rpm)
     setSpeed((uint)(rpm * baseSteps * microSteps / 60));
 }
 
-void Motor::setAcceleration(uint value)
-{
-    acceleration = value;
-}
-
-uint Motor::getAcceleration()
-{
-    return acceleration;
-}
-
 bool Motor::getStealthChop()
 {
     TMC2209::Settings settings = driver.getSettings();
@@ -91,6 +81,7 @@ bool Motor::getStealthChop()
 void Motor::setStealthChop()
 {
     uint32_t tstep = driver.getInterstepDuration();
+    Serial.println(tstep);
     if (tstep < STEALTHCHOP_THRS) 
         driver.disableStealthChop();
     else 

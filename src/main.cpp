@@ -26,7 +26,6 @@ void setup()
     setupLED();
 
     motor.diagnose();
-    motor.setSpeed(1000);
 }
 
 void loop()
@@ -75,8 +74,6 @@ void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
             motor.setRPM(atof(req["value"]));
         else if (id == "usteps")
             motor.setMicroSteps((MICROSTEPS)atoi(req["value"]));
-        else if (id == "accel")
-            motor.setAcceleration(atoi(req["value"]));
         break;
     }
 }
@@ -88,5 +85,4 @@ void updateData()
     data.microSteps = motor.getMicroSteps();
     data.rpm = motor.getRPM();
     data.speed = motor.getSpeed();
-    data.acceleration = motor.getAcceleration();
 }

@@ -26,8 +26,6 @@ public:
     void setMicroSteps(MICROSTEPS value);
     float getRPM();
     void setRPM(float value);
-    uint getAcceleration();
-    void setAcceleration(uint value);
     uint getSpeed();
     void setSpeed(uint value);
     bool getStealthChop();
@@ -38,7 +36,6 @@ private:
     uint baseSteps = 200;
     uint microSteps = 256;
     uint speed = 0;
-    uint acceleration = 1000000;
 };
 
 #endif
