@@ -1,6 +1,6 @@
 #ifndef __NETWORK__
 #define __NETWORK__
 
-void setupWiFi();
+void setupWiFi(bool useLocal);
 
 #endif

@@ -1,22 +1,18 @@
 #include <Arduino.h>
-#include "led.h"
 
 #define LED_PIN 2
-
-bool led;
 
 void setupLED()
 {
     pinMode(LED_PIN, OUTPUT);
 }
 
-void toggleLED()
+int getLED()
 {
-    digitalWrite(LED_PIN, led ? LOW : HIGH);
+    return digitalRead(LED_PIN);
 }
 
-bool getLED()
+void toggleLED()
 {
-    led = digitalRead(LED_PIN) == HIGH;
-    return led;
+    digitalWrite(LED_PIN, getLED() ? LOW : HIGH);
 }

@@ -13,9 +13,4 @@ typedef struct
     uint acceleration;
 } Data;
 
-void setMotorRPM(float value);
-void setMotoruSteps(uint value);
-void setMotorAcceleration(uint value);
-void sendData();
-
 #endif

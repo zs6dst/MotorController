@@ -2,9 +2,6 @@
 #include <WiFi.h>
 #include "network.h"
 
-#define USELOCALWIFI false
-#define AP_IP 10.1.1.1
-
 // Local wifi
 static const char localSSID[] = "zeniton";
 static const char password[] = "CT33KATPRbaXN";
@@ -16,9 +13,9 @@ static const IPAddress IP = IPAddress(10, 1, 1, 1);
 void connectToWiFi();
 void createAP();
 
-void setupWiFi()
+void setupWiFi(bool useLocal)
 {
-    USELOCALWIFI ? connectToWiFi() : createAP();
+    useLocal ? connectToWiFi() : createAP();
 }
 
 void connectToWiFi()

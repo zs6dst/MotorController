@@ -3,6 +3,6 @@
 
 void setupLED();
 void toggleLED();
-bool getLED();
+int getLED();
 
 #endif

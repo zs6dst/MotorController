@@ -2,12 +2,10 @@
 #define __WEBSERVER__
 
 #include <WebServer.h>
+#include <WebSocketsServer.h>
 #include "main.h"
-#include "motor.h"
 
-void setupServers();
-void onConnectHandler();
-void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length);
-void broadcastData(const Data *);
+void setupWeb(WebServer&, WebSocketsServer&, WebSocketsServerCore::WebSocketServerEvent);
+void sendData(WebSocketsServer&, const Data *);
 
 #endif

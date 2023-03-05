@@ -2,7 +2,6 @@
 #define __MOTOR__
 
 #include <TMC2209.h>
-#include "main.h"
 
 enum MICROSTEPS
 {
@@ -32,15 +31,14 @@ public:
     uint getSpeed();
     void setSpeed(uint value);
     bool getStealthChop();
-    uint getTSTEP();
     void setStealthChop();
 
 private:
     TMC2209 driver;
-    uint baseSteps;
-    uint microSteps;
-    uint speed;
-    uint acceleration;
+    uint baseSteps = 200;
+    uint microSteps = 256;
+    uint speed = 0;
+    uint acceleration = 1000000;
 };
 
 #endif

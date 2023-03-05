@@ -1,15 +1,12 @@
 #include <TMC2209.h>
 #include "motor.h"
 
+#define UART Serial2
 #define STEALTHCHOP_THRS 650
 
 Motor::Motor()
 {
-    baseSteps = 200;
-    microSteps = 2;
-    acceleration = 1000000;
-
-    driver.setup(Serial2);
+    driver.setup(UART);
     driver.setMicrostepsPerStep(microSteps);
     driver.setRunCurrent(100);
     driver.enableCoolStep();
@@ -20,7 +17,7 @@ Motor::Motor()
 void Motor::diagnose()
 {
     bool result = driver.isSetupAndCommunicating();
-    Serial.printf("Stepper driver %ssetup and communicating!\n", result ? "" : "not");
+    Serial.printf("Stepper driver %s configured and communicating!\n", result ? "is" : "not");
 }
 
 uint Motor::getSteps()
@@ -35,7 +32,22 @@ uint Motor::getMicroSteps()
 
 void Motor::setMicroSteps(MICROSTEPS value)
 {
-    microSteps = value;
+    //Validate value (so that it cannot be set to eg. 3) 
+    switch (value)
+    {
+    default:
+        return;
+    case _1:
+    case _2:
+    case _4:
+    case _8:
+    case _16:
+    case _32:
+    case _64:
+    case _128:
+    case _256:
+        break;
+    }
     driver.setMicrostepsPerStep(value);
 }
 
@@ -48,7 +60,6 @@ void Motor::setSpeed(uint value)
 {
     speed = value;
     driver.moveAtVelocity(speed);
-
 }
 
 float Motor::getRPM()
@@ -77,12 +88,11 @@ bool Motor::getStealthChop()
     return settings.stealth_chop_enabled;
 }
 
-uint Motor::getTSTEP()
-{
-    return driver.getInterstepDuration();
-}
-
 void Motor::setStealthChop()
 {
-    (getTSTEP() < STEALTHCHOP_THRS) ? driver.disableStealthChop() : driver.enableStealthChop();
+    uint32_t tstep = driver.getInterstepDuration();
+    if (tstep < STEALTHCHOP_THRS) 
+        driver.disableStealthChop();
+    else 
+        driver.enableStealthChop();
 }

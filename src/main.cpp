@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
+#include <ArduinoJson.h>
 
 #include "main.h"
 #include "network.h"
@@ -8,26 +9,24 @@
 #include "led.h"
 #include "motor.h"
 
-#define now millis()
-
+WebServer webserver(80);
+WebSocketsServer websocket = WebSocketsServer(81);
 static Motor motor;
 static Data data;
 
-extern WebServer server;
-extern WebSocketsServer websocket;
-
 void updateData();
+void onWebSocketEvent(byte, WStype_t, uint8_t *, size_t);
 
 void setup()
 {
     Serial.begin(115200);
 
-    setupWiFi();
-    setupServers();
+    setupWiFi(true);
+    setupWeb(webserver, websocket, onWebSocketEvent);
     setupLED();
 
     motor.diagnose();
-    motor.setSpeed(100);
+    motor.setSpeed(1000);
 }
 
 void loop()
@@ -37,40 +36,54 @@ void loop()
     const int moment = 500; // ms
     static unsigned long earlier = 0;
 
-    server.handleClient();
+    webserver.handleClient();
     websocket.loop();
 
-    if (now > earlier + moment)
+    if (millis() > earlier + moment)
     {
         updateData();
-        broadcastData(&data);
-        earlier = now;
+        sendData(websocket, &data);
+        earlier = millis();
     }
 }
 
-void setMotorRPM(float value)
+void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
 {
-    motor.setRPM(value);
-}
+    switch (type)
+    {
+    case WStype_DISCONNECTED:
+        Serial.println("Client disconnected");
+        break;
 
-void setMotoruSteps(uint value)
-{
-    motor.setMicroSteps((MICROSTEPS)value);
-}
+    case WStype_CONNECTED:
+        Serial.println("Client connected");
+        sendData(websocket, &data);
+        break;
 
-void setMotorAcceleration(uint value)
-{
-    motor.setAcceleration(value);
-}
+    case WStype_TEXT:
+        Serial.printf("Request received: %s\n", payload);
 
-void sendData()
-{
-    broadcastData(&data);
+        StaticJsonDocument<32> req;
+        deserializeJson(req, payload);
+
+        auto id = req["id"];
+        if (id == "restart")
+            ESP.restart();
+        else if (id == "led")
+            toggleLED();
+        else if (id == "rpm")
+            motor.setRPM(atof(req["value"]));
+        else if (id == "usteps")
+            motor.setMicroSteps((MICROSTEPS)atoi(req["value"]));
+        else if (id == "accel")
+            motor.setAcceleration(atoi(req["value"]));
+        break;
+    }
 }
 
 void updateData()
 {
-    data.led = getLED();
+    data.led = getLED() == HIGH;
     data.stealthChop = motor.getStealthChop();
     data.microSteps = motor.getMicroSteps();
     data.rpm = motor.getRPM();
