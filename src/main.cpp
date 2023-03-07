@@ -1,16 +1,19 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
-#include <ArduinoJson.h>
+#include <HardwareSerial.h>
 
 #include "main.h"
 #include "network.h"
 #include "webservers.h"
 #include "led.h"
 #include "motor.h"
+#include "scale.h"
 
-WebServer webserver(80);
-WebSocketsServer websocket = WebSocketsServer(81);
+static WebServer webserver(80);
+static WebSocketsServer websocket = WebSocketsServer(81);
+static HardwareSerial scale(1);
 static Motor motor;
 static Data data;
 
@@ -20,10 +23,10 @@ void onWebSocketEvent(byte, WStype_t, uint8_t *, size_t);
 void setup()
 {
     Serial.begin(115200);
-
     setupWiFi(true);
     setupWeb(webserver, websocket, onWebSocketEvent);
     setupLED();
+    setupScale(scale);
 
     motor.diagnose();
 }
@@ -37,6 +40,16 @@ void loop()
 
     webserver.handleClient();
     websocket.loop();
+
+    static char weight[64];
+    int newWeight = getWeight(scale, weight);
+    if (newWeight)
+    {
+        Serial.printf("Data: %s\n", weight);
+        newWeight = false;
+    }
+
+    delay(1000);
 
     if (millis() > earlier + moment)
     {

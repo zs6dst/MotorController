@@ -81,7 +81,6 @@ bool Motor::getStealthChop()
 void Motor::setStealthChop()
 {
     uint32_t tstep = driver.getInterstepDuration();
-    Serial.println(tstep);
     if (tstep < STEALTHCHOP_THRS) 
         driver.disableStealthChop();
     else 
