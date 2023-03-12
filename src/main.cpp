@@ -3,6 +3,7 @@
 #include <WebServer.h>
 #include <WebSocketsServer.h>
 #include <HardwareSerial.h>
+#include "SD.h"
 
 #include "main.h"
 #include "network.h"
@@ -10,12 +11,14 @@
 #include "led.h"
 #include "motor.h"
 #include "scale.h"
+#include "sdcard.h"
 
 static WebServer webserver(80);
 static WebSocketsServer websocket = WebSocketsServer(81);
 static HardwareSerial scale(1);
 static Motor motor;
 static Data data;
+static char weight[64];
 
 void updateData();
 void onWebSocketEvent(byte, WStype_t, uint8_t *, size_t);
@@ -27,6 +30,7 @@ void setup()
     setupWeb(webserver, websocket, onWebSocketEvent);
     setupLED();
     setupScale(scale);
+    setupSDCard();
 
     motor.diagnose();
 }
@@ -41,22 +45,12 @@ void loop()
     webserver.handleClient();
     websocket.loop();
 
-    static char weight[64];
-    int newWeight = getWeight(scale, weight);
-    if (newWeight)
-    {
-        Serial.printf("Data: %s\n", weight);
-        newWeight = false;
-    }
+    updateData();
+    
+    auto w = getWeight(scale, weight);
+    logSD(data.rpm, w);
 
-    delay(1000);
-
-    if (millis() > earlier + moment)
-    {
-        updateData();
-        sendData(websocket, &data);
-        earlier = millis();
-    }
+    sendData(websocket, &data);
 }
 
 void onWebSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)

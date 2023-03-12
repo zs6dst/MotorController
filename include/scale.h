@@ -4,6 +4,6 @@
 #include <HardwareSerial.h>
 
 void setupScale(HardwareSerial &);
-int getWeight(HardwareSerial &, char *);
+char *getWeight(HardwareSerial &scale, char (&)[64]);
 
 #endif

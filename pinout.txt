@@ -1,0 +1,21 @@
+                       +---------+   
+                3.3V   |         | GND
+                EN     |         | GPIO23  VSPI MOSI    SD MOSI
+                GPIO36 |         | GPIO22  I2C SCL
+                GPIO39 |         | GPIO01  TX0
+                GPIO34 |         | GPIO03  RX0
+                GPIO35 |         | GPIO21  I2C SDA
+                GPIO32 |         | GND
+                GPIO33 |         | GPIO19  VSPI MISO    SD MISO
+                GPIO25 |         | GPIO18  VSPI SCK     SD SCK
+                GPIO26 |         | GPIO05  VSPI SS      SD CS
+Scale TX        GPIO27 |         | GPIO17  TX2          TMC2209 RX
+        SPI CLK GPIO14 |         | GPIO16  RX2          TMC2209 TX?
+        MISO    GPIO12 |         | GPIO04               TMC2209 ?
+                GND    |         | GPIO00               TMC2209 ?
+        MOSI    GPIO13 |         | GPIO02  LED
+        RX1     GPIO09 |         | GPIO15  SPI SS       Scale RX
+        TX1     GPIO10 |         | GPIO08
+                GPIO11 |         | GPIO07
+                Vin    |         | GPIO06
+                       +---------+   
