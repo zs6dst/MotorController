@@ -10,6 +10,6 @@ typedef struct
     uint microSteps;
     float rpm;
     uint speed;
-} Data;
+} Data_t;
 
 #endif

@@ -17,7 +17,7 @@ static WebServer webserver(80);
 static WebSocketsServer websocket = WebSocketsServer(81);
 static HardwareSerial scale(1);
 static Motor motor;
-static Data data;
+static Data_t data;
 static char weight[64];
 
 void updateData();

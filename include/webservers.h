@@ -6,6 +6,6 @@
 #include "main.h"
 
 void setupWeb(WebServer&, WebSocketsServer&, WebSocketsServerCore::WebSocketServerEvent);
-void sendData(WebSocketsServer&, const Data *);
+void sendData(WebSocketsServer&, const Data_t *);
 
 #endif

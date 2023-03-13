@@ -22,7 +22,7 @@ void setupWeb(WebServer &server, WebSocketsServer &websocket, WebSocketsServerCo
     websocket.begin();
 }
 
-void sendData(WebSocketsServer &websocket, const Data *data)
+void sendData(WebSocketsServer &websocket, const Data_t *data)
 {
     auto addDataItem = [](JsonArray *array, const char *id, const char *value) -> void
     {
