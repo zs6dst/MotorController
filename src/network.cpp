@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include "network.h"
 
 // Local wifi
 static const char localSSID[] = "zeniton";

@@ -12,4 +12,10 @@ typedef struct
     uint speed;
 } Data_t;
 
+typedef struct
+{
+    unsigned int duration;
+    float rpm;
+} Step_t;
+
 #endif
