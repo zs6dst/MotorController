@@ -1,8 +1,14 @@
+#include "sdcard.h"
 #include "SD.h"
 
-static char logName[128];
+void setFilename(char *);
 
-void setupSDCard()
+SDCard::SDCard()
+{
+    ok = false;
+}
+
+void SDCard::diagnose()
 {
     if (!SD.begin(5))
     {
@@ -11,7 +17,6 @@ void setupSDCard()
     }
 
     uint8_t cardType = SD.cardType();
-
     if (cardType == CARD_NONE)
     {
         Serial.println("No SD card attached");
@@ -31,14 +36,19 @@ void setupSDCard()
     uint64_t cardSize = SD.cardSize() / (1024 * 1024);
     Serial.printf("SD Card Size: %lluMB\n", cardSize);
 
-    sprintf(logName, "/%lu.csv", millis());
-    Serial.printf("SD card log: %s\n", logName);
+    setFilename(fileName);
+    Serial.printf("SD card log name: %s\n", fileName);
+
+    ok = true;
     return;
 }
 
-void logSD(float rpm, char *weight)
+void SDCard::log(float rpm, char *weight)
 {
-    File file = SD.open(logName, FILE_APPEND);
+    if (!ok)
+        return;
+
+    File file = SD.open(fileName, FILE_APPEND);
     if (!file)
         return;
 
@@ -49,4 +59,9 @@ void logSD(float rpm, char *weight)
         file.printf("%lu,%6.1f,\n", timestamp, rpm);
 
     file.close();
+}
+
+void setFilename(char *fileName)
+{
+    sprintf(fileName, "/%lu.csv", millis());
 }

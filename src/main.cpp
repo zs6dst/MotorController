@@ -3,17 +3,20 @@
 #include <WebServer.h>
 #include <WebSocketsServer.h>
 #include <HardwareSerial.h>
-#include "SD.h"
+#include "sdcard.h"
 
 #include "main.h"
 #include "motor.h"
 
+// Devices
 static WebServer webserver(80);
 static WebSocketsServer websocket = WebSocketsServer(81);
 static HardwareSerial scale(1);
-static Motor motor;
 static hw_timer_t *timer = NULL;
+static Motor motor;
+static SDCard sdcard;
 
+// Variables
 static Data_t data;
 static char weight[64];
 static unsigned int steps;
@@ -21,13 +24,14 @@ static volatile int step = 0;
 static volatile bool update = true;
 static volatile bool done = false;
 
-// Spec schedule here
+// Spec programme here
 const Step_t programme[] = {
     {5, 1.0},
     {2, 10.0},
     {5, 50.0},
     {2, 100.0}};
 
+// Forward declarations
 int getLED();
 void setupLED();
 void toggleLED();
@@ -55,8 +59,8 @@ void setup()
     setupWeb(webserver, websocket, onWebSocketEvent);
     setupLED();
     setupScale(scale);
-    setupSDCard();
     motor.diagnose();
+    sdcard.diagnose();
 
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, &onAlarm, true);
@@ -80,7 +84,7 @@ void loop()
     updateData();
 
     auto w = getWeight(scale, weight);
-    logSD(data.rpm, w);
+    sdcard.log(data.rpm, w);
 
     sendData(websocket, &data);
 
