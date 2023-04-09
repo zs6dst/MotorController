@@ -1,0 +1,12 @@
+<style>
+    .output {
+        border-width: 1px;
+        border-style: solid;
+        border-color: black;
+    }
+
+    .reset {
+        color: white;
+        background-color: red;
+    }
+</style>
