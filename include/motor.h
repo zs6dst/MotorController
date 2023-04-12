@@ -18,24 +18,24 @@ enum MICROSTEPS
 
 class Motor
 {
-public:
-    Motor();
-    void diagnose();
-    uint getSteps();
-    uint getMicroSteps();
-    void setMicroSteps(MICROSTEPS value);
-    float getRPM();
-    void setRPM(float value);
-    uint getSpeed();
-    void setSpeed(uint value);
-    bool getStealthChop();
-    void setStealthChop();
+	public:
+		Motor();
+		void diagnose();
+		uint getSteps();
+		uint getMicroSteps();
+		void setMicroSteps(MICROSTEPS value);
+		float getRPM();
+		void setRPM(float value);
+		uint getSpeed();
+		void setSpeed(uint value);
+		bool getStealthChop();
+		void setStealthChop();
 
-private:
-    TMC2209 driver;
-    uint baseSteps = 200;
-    uint microSteps = 256;
-    uint speed = 0;
+	private:
+		TMC2209 driver;
+		uint baseSteps = 200;
+		uint microSteps = 256;
+		uint speed = 0;
 };
 
 #endif

@@ -1,15 +1,14 @@
 #include <Arduino.h>
-#include <ArduinoJson.h>
 #include <HardwareSerial.h>
 #include "ESPAsyncWebServer.h"
 #include "SPIFFS.h"
 #include "sdcard.h"
-
 #include "main.h"
 #include "motor.h"
 
 // Devices
 static AsyncWebServer webserver(80);
+static AsyncEventSource events("/events");
 static HardwareSerial scale(1);
 static hw_timer_t *timer = NULL;
 static Motor motor;
@@ -23,27 +22,30 @@ static volatile int step = 0;
 static volatile bool update = true;
 static volatile bool done = false;
 
-// Spec programme here
+// Specify programme here
+// Format: {<seconds>, <RPM>}
 const Step_t programme[] = {
     {5, 1.0},
-    {2, 10.0},
+    {5, 10.0},
     {5, 50.0},
-    {2, 100.0}};
+    {5, 100.0}
+};
 
 // Forward declarations
 int getLED();
 void setupLED();
 void toggleLED();
 void setupWiFi(bool useLocal);
+void sendData(AsyncEventSource &, Data_t &);
 void updateData();
 void showSchedule();
-void setupWeb();
-// void sendData(WebSocketsServer &, const Data_t *);
+void setupWeb(AsyncWebServer &, AsyncEventSource &);
 void setupScale(HardwareSerial &);
 char *getWeight(HardwareSerial &scale, char (&)[64]);
 void setupSDCard();
 void logSD(float, char *);
 
+// Timer "alarm" event
 void IRAM_ATTR onAlarm()
 {
     ++step;
@@ -54,15 +56,15 @@ void setup()
 {
     Serial.begin(115200);
 
-    if (!SPIFFS.begin(true))
+    if (!SPIFFS.begin(/* formatOnFail */ true)) {
     {
         Serial.println("An Error has occurred while mounting SPIFFS");
         return;
     }
     Serial.println("SPIFFS mounted successfully");
 
-    setupWiFi(true);
-    setupWeb();
+    setupWiFi(/* useLocal */ true);
+    setupWeb(webserver, events);
     setupLED();
     setupScale(scale);
     motor.diagnose();
@@ -89,10 +91,11 @@ void loop()
     auto w = getWeight(scale, weight);
     sdcard.log(data.rpm, w);
 
-    // sendData(websocket, &data);
+    sendData(events, data);
 
     if (done)
         return;
+
     if (step < steps)
     {
         if (update)
@@ -127,13 +130,14 @@ void updateData()
     data.speed = motor.getSpeed();
 }
 
-void setupWeb()
+void setValue(String id, String value)
 {
-    webserver.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-                 { request->send(SPIFFS, "/index.html", "text/html"); });
-
-    webserver.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
-                 { request->send(SPIFFS, "/style.css", "text/css"); });
-
-    webserver.begin(); 
+    if (id == "rpm")
+        motor.setRPM(value.toFloat());
+    else if (id == "microsteps")
+        motor.setMicroSteps((MICROSTEPS)value.toInt());
+    else if (id == "led")
+        toggleLED();
+    else if (id == "esp32")
+        ESP.restart();
 }

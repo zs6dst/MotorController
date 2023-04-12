@@ -56,7 +56,7 @@ void SDCard::log(float rpm, char *weight)
     if (weight)
         file.printf("%lu,%6.1f,%s\n", timestamp, rpm, weight);
     else
-        file.printf("%lu,%6.1f,\n", timestamp, rpm);
+        file.printf("%lu,%6.1f\n", timestamp, rpm);
 
     file.close();
 }
